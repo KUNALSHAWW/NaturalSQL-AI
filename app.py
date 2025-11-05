@@ -9,7 +9,10 @@ except Exception:
     try:
         from langchain.agents.agent_types import AgentType
     except Exception:
-        AgentType = None
+        try:
+            from langchain_classic.agents.agent_types import AgentType
+        except Exception:
+            AgentType = None
 from langchain_community.callbacks import StreamlitCallbackHandler
 from langchain_community.agent_toolkits import SQLDatabaseToolkit
 from sqlalchemy import create_engine
@@ -139,14 +142,25 @@ else:
 ## toolkit
 toolkit=SQLDatabaseToolkit(db=db,llm=llm)
 
-# create agent with fallback if AgentType is unavailable
-agent_kwargs = dict(llm=llm, toolkit=toolkit, verbose=True, max_iterations=max_iterations, handle_parsing_errors=True)
+# Create agent with fallback if AgentType is unavailable
+agent_kwargs = dict(
+    llm=llm,
+    toolkit=toolkit,
+    verbose=True,
+    max_iterations=max_iterations,
+    handle_parsing_errors=True
+)
+
+# Set agent_type with fallbacks across LangChain versions
 if AgentType is not None:
     try:
         agent_kwargs['agent_type'] = AgentType.ZERO_SHOT_REACT_DESCRIPTION
-    except Exception:
-        # Some versions may use a different enum member name; try a string fallback
+    except (AttributeError, Exception):
+        # If enum member doesn't exist, use string fallback
         agent_kwargs['agent_type'] = 'zero-shot-react-description'
+else:
+    # If AgentType couldn't be imported, use string fallback
+    agent_kwargs['agent_type'] = 'zero-shot-react-description'
 
 agent = create_sql_agent(**agent_kwargs)
 
