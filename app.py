@@ -2,7 +2,14 @@ import streamlit as st
 from pathlib import Path
 from langchain_community.agent_toolkits import create_sql_agent
 from langchain_community.utilities import SQLDatabase
-from langchain.agents import AgentType
+# Import AgentType with fallbacks for different LangChain versions
+try:
+    from langchain.agents import AgentType
+except Exception:
+    try:
+        from langchain.agents.agent_types import AgentType
+    except Exception:
+        AgentType = None
 from langchain_community.callbacks import StreamlitCallbackHandler
 from langchain_community.agent_toolkits import SQLDatabaseToolkit
 from sqlalchemy import create_engine
@@ -98,7 +105,7 @@ def configure_db(db_uri,mysql_host=None,mysql_user=None,mysql_password=None,mysq
         dbfilepath=(Path(__file__).parent/"student.db").absolute()
         print(dbfilepath)
         creator = lambda: sqlite3.connect(f"file:{dbfilepath}?mode=ro", uri=True)
-        return SQLDatabase(create_engine("sqlite:///'", creator=creator))
+        return SQLDatabase(create_engine("sqlite:///", creator=creator))
     elif db_uri==MYSQL:
         if not (mysql_host and mysql_user and mysql_password and mysql_db):
             st.error("Please provide all MySQL connection details.")
@@ -113,14 +120,16 @@ else:
 ## toolkit
 toolkit=SQLDatabaseToolkit(db=db,llm=llm)
 
-agent=create_sql_agent(
-    llm=llm,
-    toolkit=toolkit,
-    verbose=True,
-    agent_type=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
-    max_iterations=max_iterations,
-    handle_parsing_errors=True
-)
+# create agent with fallback if AgentType is unavailable
+agent_kwargs = dict(llm=llm, toolkit=toolkit, verbose=True, max_iterations=max_iterations, handle_parsing_errors=True)
+if AgentType is not None:
+    try:
+        agent_kwargs['agent_type'] = AgentType.ZERO_SHOT_REACT_DESCRIPTION
+    except Exception:
+        # Some versions may use a different enum member name; try a string fallback
+        agent_kwargs['agent_type'] = 'zero-shot-react-description'
+
+agent = create_sql_agent(**agent_kwargs)
 
 # Display database schema if requested
 if st.session_state.get('show_schema', False):
