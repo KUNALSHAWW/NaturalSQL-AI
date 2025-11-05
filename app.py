@@ -21,6 +21,9 @@ import json
 import os
 import logging
 
+# Debug mode constant
+DEBUG_MODE = os.getenv("STREAMLIT_DEBUG", "").lower() == "true"
+
 st.set_page_config(
     page_title="AI-Powered SQL Chat Assistant", 
     page_icon="🤖",
@@ -29,7 +32,7 @@ st.set_page_config(
 )
 
 # Debug mode logging
-if os.getenv("STREAMLIT_DEBUG", "").lower() == "true":
+if DEBUG_MODE and not logging.getLogger().hasHandlers():
     logging.basicConfig(level=logging.DEBUG)
     try:
         import langchain
@@ -80,13 +83,14 @@ if radio_opt.index(selected_opt)==1:
 else:
     db_uri=LOCALDB
 
-    st.sidebar.markdown("---")
+with st.sidebar:
+    st.markdown("---")
     
     # API Configuration
-    st.sidebar.subheader("🔑 API Settings")
-# Get API key from sidebar input or environment variable
-api_key_input = st.sidebar.text_input(label="Groq API Key", type="password")
-api_key = api_key_input if api_key_input else os.getenv("GROQ_API_KEY", "")
+    st.subheader("🔑 API Settings")
+    # Get API key from sidebar input or environment variable
+    api_key_input = st.text_input(label="Groq API Key", type="password")
+    api_key = api_key_input if api_key_input else os.getenv("GROQ_API_KEY", "")
 
 # Additional Settings
 with st.sidebar.expander("🔧 Advanced Settings"):
@@ -116,7 +120,7 @@ try:
 except Exception as e:
     st.error(f"❌ Failed to initialize Groq LLM client: {str(e)}")
     st.error("Please verify your API key is correct and you have internet connectivity.")
-    if os.getenv("STREAMLIT_DEBUG", "").lower() == "true":
+    if DEBUG_MODE:
         st.exception(e)
     st.stop()
 
