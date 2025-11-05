@@ -18,6 +18,11 @@ from langchain_groq import ChatGroq
 import pandas as pd
 from datetime import datetime
 import json
+import os
+import logging
+
+# Debug mode constant
+DEBUG_MODE = os.getenv("STREAMLIT_DEBUG", "").lower() == "true"
 
 st.set_page_config(
     page_title="AI-Powered SQL Chat Assistant", 
@@ -25,6 +30,15 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
+# Debug mode logging
+if DEBUG_MODE and not logging.getLogger().hasHandlers():
+    logging.basicConfig(level=logging.DEBUG)
+    try:
+        import langchain
+        logging.debug(f"LangChain version: {langchain.__version__}")
+    except Exception as e:
+        logging.debug(f"Could not determine LangChain version: {e}")
 
 # Custom CSS for better UI
 st.markdown("""
@@ -69,11 +83,14 @@ if radio_opt.index(selected_opt)==1:
 else:
     db_uri=LOCALDB
 
-    st.sidebar.markdown("---")
+with st.sidebar:
+    st.markdown("---")
     
     # API Configuration
-    st.sidebar.subheader("🔑 API Settings")
-api_key=st.sidebar.text_input(label="Groq API Key",type="password")
+    st.subheader("🔑 API Settings")
+    # Get API key from sidebar input or environment variable
+    api_key_input = st.text_input(label="Groq API Key", type="password")
+    api_key = api_key_input if api_key_input else os.getenv("GROQ_API_KEY", "")
 
 # Additional Settings
 with st.sidebar.expander("🔧 Advanced Settings"):
@@ -94,10 +111,18 @@ if not db_uri:
     st.info("Please enter the database information and uri")
 
 if not api_key:
-    st.info("Please add the groq api key")
+    st.error("⚠️ Groq API Key is required. Please provide it via the sidebar input or set the GROQ_API_KEY environment variable.")
+    st.stop()
 
-## LLM model
-llm=ChatGroq(groq_api_key=api_key,model_name=model_name,streaming=True,temperature=temperature)
+## LLM model - wrap initialization in try/except for better error handling
+try:
+    llm = ChatGroq(groq_api_key=api_key, model_name=model_name, streaming=True, temperature=temperature)
+except Exception as e:
+    st.error(f"❌ Failed to initialize Groq LLM client: {str(e)}")
+    st.error("Please verify your API key is correct and you have internet connectivity.")
+    if DEBUG_MODE:
+        st.exception(e)
+    st.stop()
 
 @st.cache_resource(ttl="2h")
 def configure_db(db_uri,mysql_host=None,mysql_user=None,mysql_password=None,mysql_db=None):
