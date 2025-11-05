@@ -54,7 +54,7 @@ st.markdown("""
         margin: 1rem 0;
     }
     </style>
-    ", unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
 
 st.markdown('<p class="main-header">🤖 AI-Powered SQL Database Chat Assistant</p>', unsafe_allow_html=True)
 st.markdown("---")
