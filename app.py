@@ -9,7 +9,10 @@ except Exception:
     try:
         from langchain.agents.agent_types import AgentType
     except Exception:
-        AgentType = None
+        try:
+            from langchain_classic.agents.agent_types import AgentType
+        except Exception:
+            AgentType = None
 from langchain_community.callbacks import StreamlitCallbackHandler
 from langchain_community.agent_toolkits import SQLDatabaseToolkit
 from sqlalchemy import create_engine
@@ -18,6 +21,7 @@ from langchain_groq import ChatGroq
 import pandas as pd
 from datetime import datetime
 import json
+import os
 
 st.set_page_config(
     page_title="AI-Powered SQL Chat Assistant", 
@@ -69,11 +73,15 @@ if radio_opt.index(selected_opt)==1:
 else:
     db_uri=LOCALDB
 
-    st.sidebar.markdown("---")
-    
-    # API Configuration
-    st.sidebar.subheader("🔑 API Settings")
-api_key=st.sidebar.text_input(label="Groq API Key",type="password")
+st.sidebar.markdown("---")
+
+# API Configuration
+st.sidebar.subheader("🔑 API Settings")
+# Get API key from sidebar input or environment variable
+api_key = st.sidebar.text_input(label="Groq API Key", type="password")
+if not api_key:
+    # Fallback to environment variable if sidebar input is empty
+    api_key = os.getenv("GROQ_API_KEY", "")
 
 # Additional Settings
 with st.sidebar.expander("🔧 Advanced Settings"):
@@ -93,11 +101,25 @@ with st.sidebar.expander("📋 View Database Schema"):
 if not db_uri:
     st.info("Please enter the database information and uri")
 
+# Validate API key before proceeding
 if not api_key:
-    st.info("Please add the groq api key")
+    st.error("🔑 **Groq API Key Required**: Please provide your Groq API key either in the sidebar or set the GROQ_API_KEY environment variable.")
+    st.info("You can obtain a free API key from [Groq Console](https://console.groq.com/)")
+    st.stop()
 
-## LLM model
-llm=ChatGroq(groq_api_key=api_key,model_name=model_name,streaming=True,temperature=temperature)
+# Initialize LLM model with error handling
+try:
+    llm = ChatGroq(
+        groq_api_key=api_key,
+        model_name=model_name,
+        streaming=True,
+        temperature=temperature
+    )
+except Exception as e:
+    st.error("❌ **Failed to initialize Groq LLM**: Unable to connect with the provided API key.")
+    st.info("Please verify your API key is correct and try again.")
+    # Don't expose the actual error which might contain sensitive info
+    st.stop()
 
 @st.cache_resource(ttl="2h")
 def configure_db(db_uri,mysql_host=None,mysql_user=None,mysql_password=None,mysql_db=None):
@@ -120,14 +142,25 @@ else:
 ## toolkit
 toolkit=SQLDatabaseToolkit(db=db,llm=llm)
 
-# create agent with fallback if AgentType is unavailable
-agent_kwargs = dict(llm=llm, toolkit=toolkit, verbose=True, max_iterations=max_iterations, handle_parsing_errors=True)
+# Create agent with fallback if AgentType is unavailable
+agent_kwargs = dict(
+    llm=llm,
+    toolkit=toolkit,
+    verbose=True,
+    max_iterations=max_iterations,
+    handle_parsing_errors=True
+)
+
+# Set agent_type with fallbacks across LangChain versions
 if AgentType is not None:
     try:
         agent_kwargs['agent_type'] = AgentType.ZERO_SHOT_REACT_DESCRIPTION
     except Exception:
-        # Some versions may use a different enum member name; try a string fallback
+        # If enum member doesn't exist, use string fallback
         agent_kwargs['agent_type'] = 'zero-shot-react-description'
+else:
+    # If AgentType couldn't be imported, use string fallback
+    agent_kwargs['agent_type'] = 'zero-shot-react-description'
 
 agent = create_sql_agent(**agent_kwargs)
 
