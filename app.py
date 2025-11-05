@@ -73,10 +73,10 @@ if radio_opt.index(selected_opt)==1:
 else:
     db_uri=LOCALDB
 
-    st.sidebar.markdown("---")
-    
-    # API Configuration
-    st.sidebar.subheader("🔑 API Settings")
+st.sidebar.markdown("---")
+
+# API Configuration
+st.sidebar.subheader("🔑 API Settings")
 # Get API key from sidebar input or environment variable
 api_key = st.sidebar.text_input(label="Groq API Key", type="password")
 if not api_key:
@@ -155,7 +155,7 @@ agent_kwargs = dict(
 if AgentType is not None:
     try:
         agent_kwargs['agent_type'] = AgentType.ZERO_SHOT_REACT_DESCRIPTION
-    except (AttributeError, Exception):
+    except Exception:
         # If enum member doesn't exist, use string fallback
         agent_kwargs['agent_type'] = 'zero-shot-react-description'
 else:
