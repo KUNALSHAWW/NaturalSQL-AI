@@ -54,7 +54,7 @@ st.markdown("""
         margin: 1rem 0;
     }
     </style>
-    """, unsafe_allow_html=True)
+    ", unsafe_allow_html=True)
 
 st.markdown('<p class="main-header">🤖 AI-Powered SQL Database Chat Assistant</p>', unsafe_allow_html=True)
 st.markdown("---")
@@ -96,12 +96,11 @@ if not api_key:
     st.stop()
 
 # Additional Settings
+# Use env var GROQ_MODEL as default; allow fallback via GROQ_FALLBACK_MODEL
+model_env = os.environ.get("GROQ_MODEL", "")
+fallback_env = os.environ.get("GROQ_FALLBACK_MODEL", "")
 with st.sidebar.expander("🔧 Advanced Settings"):
-    model_name = st.selectbox(
-        "Select LLM Model",
-        ["Llama3-8b-8192", "Llama3-70b-8192", "Mixtral-8x7b-32768"],
-        index=0
-    )
+    model_name = st.text_input("Groq model name (see Groq docs)", value=model_env or "llama3-70b-8192")
     max_iterations = st.slider("Max Agent Iterations", 5, 20, 15)
     temperature = st.slider("Temperature", 0.0, 1.0, 0.1)
 
@@ -114,12 +113,29 @@ if not db_uri:
     st.info("Please enter the database information and uri")
 
 ## LLM model initialization (wrapped in try/except)
+# Handles decommissioned model errors and optional fallback
 try:
     llm = ChatGroq(groq_api_key=api_key, model_name=model_name, streaming=True, temperature=temperature)
 except Exception as e:
-    st.error("Failed to initialize the Groq LLM client. Please verify your API key and model selection.")
-    st.exception(e)
-    st.stop()
+    err_str = str(e).lower()
+    if "decommissioned" in err_str or "model_decommissioned" in err_str:
+        st.error("The Groq model you selected appears to be decommissioned and is no longer supported.")
+        st.info("Please pick a supported model. See Groq deprecation docs: https://console.groq.com/docs/deprecations")
+        if fallback_env:
+            st.warning(f"Attempting fallback model from GROQ_FALLBACK_MODEL: {fallback_env}")
+            try:
+                llm = ChatGroq(groq_api_key=api_key, model_name=fallback_env, streaming=True, temperature=temperature)
+                st.success(f"Initialized fallback model: {fallback_env}")
+            except Exception as e2:
+                st.error(f"Fallback model failed to initialize: {fallback_env}")
+                st.exception(e2)
+                st.stop()
+        else:
+            st.stop()
+    else:
+        st.error("Failed to initialize the Groq LLM client. Please verify your API key and model selection.")
+        st.exception(e)
+        st.stop()
 
 @st.cache_resource(ttl=7200)
 def configure_db(db_uri, mysql_host=None, mysql_user=None, mysql_password=None, mysql_db=None):
