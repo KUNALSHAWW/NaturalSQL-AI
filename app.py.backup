@@ -1,10 +1,8 @@
-import os
 import streamlit as st
 from pathlib import Path
 from langchain_community.agent_toolkits import create_sql_agent
 from langchain_community.utilities import SQLDatabase
-
-# Robust AgentType import for cross-version compatibility
+# Import AgentType with fallbacks for different LangChain versions
 try:
     from langchain.agents import AgentType
 except Exception:
@@ -12,7 +10,6 @@ except Exception:
         from langchain.agents.agent_types import AgentType
     except Exception:
         AgentType = None
-
 from langchain_community.callbacks import StreamlitCallbackHandler
 from langchain_community.agent_toolkits import SQLDatabaseToolkit
 from sqlalchemy import create_engine
@@ -23,19 +20,11 @@ from datetime import datetime
 import json
 
 st.set_page_config(
-    page_title="AI-Powered SQL Chat Assistant",
+    page_title="AI-Powered SQL Chat Assistant", 
     page_icon="🤖",
     layout="wide",
     initial_sidebar_state="expanded"
 )
-
-# Optional debug: write langchain version to UI/logs when STREAMLIT_DEBUG=true
-if os.environ.get("STREAMLIT_DEBUG", "").lower() in ("1", "true", "yes"):
-    try:
-        import langchain
-        st.write("debug: langchain version:", getattr(langchain, "__version__", "unknown"))
-    except Exception:
-        st.write("debug: langchain not importable")
 
 # Custom CSS for better UI
 st.markdown("""
@@ -59,8 +48,8 @@ st.markdown("""
 st.markdown('<p class="main-header">🤖 AI-Powered SQL Database Chat Assistant</p>', unsafe_allow_html=True)
 st.markdown("---")
 
-LOCALDB = "USE_LOCALDB"
-MYSQL = "USE_MYSQL"
+LOCALDB="USE_LOCALDB"
+MYSQL="USE_MYSQL"
 
 # Sidebar Configuration
 with st.sidebar:
@@ -68,32 +57,23 @@ with st.sidebar:
     
     # Database Selection
     st.subheader("📊 Database Connection")
-    radio_opt = ["Use SQLLite 3 Database- Student.db", "Connect to your MySQL Database"]
-    selected_opt = st.radio(label="Choose the DB which you want to chat", options=radio_opt)
+    radio_opt=["Use SQLLite 3 Database- Student.db","Connect to your MySQL Database"]
+    selected_opt=st.radio(label="Choose the DB which you want to chat",options=radio_opt)
 
-if radio_opt.index(selected_opt) == 1:
-    db_uri = MYSQL
-    mysql_host = st.sidebar.text_input("Provide MySQL Host")
-    mysql_user = st.sidebar.text_input("MYSQL User")
-    mysql_password = st.sidebar.text_input("MYSQL password", type="password")
-    mysql_db = st.sidebar.text_input("MySQL database")
+if radio_opt.index(selected_opt)==1:
+    db_uri=MYSQL
+    mysql_host=st.sidebar.text_input("Provide MySQL Host")
+    mysql_user=st.sidebar.text_input("MYSQL User")
+    mysql_password=st.sidebar.text_input("MYSQL password",type="password")
+    mysql_db=st.sidebar.text_input("MySQL database")
 else:
-    db_uri = LOCALDB
+    db_uri=LOCALDB
 
     st.sidebar.markdown("---")
     
     # API Configuration
     st.sidebar.subheader("🔑 API Settings")
-
-# User can enter API key in sidebar; fallback to GROQ_API_KEY env var
-api_key = st.sidebar.text_input(label="Groq API Key", type="password")
-if not api_key:
-    api_key = os.environ.get("GROQ_API_KEY", "")
-
-# If no API key provided anywhere, show a clear message and stop before initializing the LLM client
-if not api_key:
-    st.error("Groq API key is required. Provide it in the sidebar or set the GROQ_API_KEY environment variable for your deployment.")
-    st.stop()
+api_key=st.sidebar.text_input(label="Groq API Key",type="password")
 
 # Additional Settings
 with st.sidebar.expander("🔧 Advanced Settings"):
@@ -113,33 +93,32 @@ with st.sidebar.expander("📋 View Database Schema"):
 if not db_uri:
     st.info("Please enter the database information and uri")
 
-## LLM model initialization (wrapped in try/except)
-try:
-    llm = ChatGroq(groq_api_key=api_key, model_name=model_name, streaming=True, temperature=temperature)
-except Exception as e:
-    st.error("Failed to initialize the Groq LLM client. Please verify your API key and model selection.")
-    st.exception(e)
-    st.stop()
+if not api_key:
+    st.info("Please add the groq api key")
 
-@st.cache_resource(ttl=7200)
-def configure_db(db_uri, mysql_host=None, mysql_user=None, mysql_password=None, mysql_db=None):
-    if db_uri == LOCALDB:
-        dbfilepath = (Path(__file__).parent / "student.db").absolute()
+## LLM model
+llm=ChatGroq(groq_api_key=api_key,model_name=model_name,streaming=True,temperature=temperature)
+
+@st.cache_resource(ttl="2h")
+def configure_db(db_uri,mysql_host=None,mysql_user=None,mysql_password=None,mysql_db=None):
+    if db_uri==LOCALDB:
+        dbfilepath=(Path(__file__).parent/"student.db").absolute()
+        print(dbfilepath)
         creator = lambda: sqlite3.connect(f"file:{dbfilepath}?mode=ro", uri=True)
         return SQLDatabase(create_engine("sqlite:///", creator=creator))
-    elif db_uri == MYSQL:
+    elif db_uri==MYSQL:
         if not (mysql_host and mysql_user and mysql_password and mysql_db):
             st.error("Please provide all MySQL connection details.")
             st.stop()
         return SQLDatabase(create_engine(f"mysql+mysqlconnector://{mysql_user}:{mysql_password}@{mysql_host}/{mysql_db}"))   
 
-if db_uri == MYSQL:
-    db = configure_db(db_uri, mysql_host, mysql_user, mysql_password, mysql_db)
+if db_uri==MYSQL:
+    db=configure_db(db_uri,mysql_host,mysql_user,mysql_password,mysql_db)
 else:
-    db = configure_db(db_uri)
+    db=configure_db(db_uri)
 
 ## toolkit
-toolkit = SQLDatabaseToolkit(db=db, llm=llm)
+toolkit=SQLDatabaseToolkit(db=db,llm=llm)
 
 # create agent with fallback if AgentType is unavailable
 agent_kwargs = dict(llm=llm, toolkit=toolkit, verbose=True, max_iterations=max_iterations, handle_parsing_errors=True)
@@ -147,10 +126,8 @@ if AgentType is not None:
     try:
         agent_kwargs['agent_type'] = AgentType.ZERO_SHOT_REACT_DESCRIPTION
     except Exception:
+        # Some versions may use a different enum member name; try a string fallback
         agent_kwargs['agent_type'] = 'zero-shot-react-description'
-else:
-    # fallback to string name which some langchain helpers accept
-    agent_kwargs['agent_type'] = 'zero-shot-react-description'
 
 agent = create_sql_agent(**agent_kwargs)
 
@@ -192,7 +169,7 @@ if "messages" not in st.session_state or st.sidebar.button("Clear message histor
 for msg in st.session_state.messages:
     st.chat_message(msg["role"]).write(msg["content"])
 
-user_query = st.chat_input(placeholder="Ask anything from the database")
+user_query=st.chat_input(placeholder="Ask anything from the database")
 
 if user_query:
     st.session_state.messages.append({"role": "user", "content": user_query})
@@ -205,10 +182,10 @@ if user_query:
     })
 
     with st.chat_message("assistant"):
-        streamlit_callback = StreamlitCallbackHandler(st.container())
+        streamlit_callback=StreamlitCallbackHandler(st.container())
         try:
-            response = agent.run(user_query, callbacks=[streamlit_callback])
-            st.session_state.messages.append({"role": "assistant", "content": response})
+            response=agent.run(user_query,callbacks=[streamlit_callback])
+            st.session_state.messages.append({"role":"assistant","content":response})
             st.write(response)
         except Exception as e:
             error_msg = f"❌ Error: {str(e)}"
