@@ -172,7 +172,7 @@ You have access to tools for interacting with the database. Use them appropriate
 """
 
 # create agent with fallback if AgentType is unavailable
-agent_kwargs = dict(llm=llm, toolkit=toolkit, verbose=True, max_iterations=max_iterations, handle_parsing_errors=True, agent_executor_kwargs={"handle_parsing_errors": True}) agent_executor_kwargs={"handle_parsing_errors": True})
+agent_kwargs = dict(llm=llm, toolkit=toolkit, verbose=True, max_iterations=max_iterations, handle_parsing_errors=True, agent_executor_kwargs={"handle_parsing_errors": True})
 if AgentType is not None:
     try:
         agent_kwargs['agent_type'] = AgentType.ZERO_SHOT_REACT_DESCRIPTION
