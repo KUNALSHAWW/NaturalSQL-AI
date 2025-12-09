@@ -229,20 +229,22 @@ if user_query:
 
     # Enhance user query with context to guide the agent
     enhanced_query = f"""
-Context: You are interacting with a SQL database. You have the ability to execute all SQL operations including SELECT, INSERT, UPDATE, DELETE, and CREATE.
+Context: You are interacting with a SQL database. You can provide SQL queries and execute SELECT statements.
 
 User Request: {user_query}
 
 Instructions:
-- If the user is asking a QUESTION (e.g., "how many?", "show me", "list"), use SELECT to query and return the answer.
-- If the user wants to ADD/INSERT data (e.g., "add a student", "insert a row"), use INSERT and confirm success.
-- If the user wants to UPDATE data (e.g., "change marks", "update"), use UPDATE and confirm success.
-- If the user wants to DELETE data, use DELETE and confirm success.
-- If the user wants to CREATE/ALTER tables or schema, execute the DDL statement and confirm success.
-- ALWAYS execute the appropriate SQL command - do NOT just describe what to do.
-- After any modification, verify it worked by querying the result.
+- If the user is asking a QUESTION (e.g., "how many?", "show me", "list"), EXECUTE the SELECT query and return the answer.
+- If the user asks HOW to do something (e.g., "how to add", "how to update", "how to delete"), provide the SQL query WITHOUT executing it.
+- ONLY execute INSERT/UPDATE/DELETE/CREATE operations if the user EXPLICITLY asks you to perform the action using clear action verbs like:
+  * "Add/Insert this data now"
+  * "Update the database"
+  * "Delete this record"
+  * "Create this table"
+- If the request is ambiguous, provide the SQL query and ask for confirmation before executing.
+- Always explain what the SQL query does.
 
-Provide a clear, direct answer to the user's request.
+Provide a clear, helpful response to the user's request.
 """
 
     with st.chat_message("assistant"):
