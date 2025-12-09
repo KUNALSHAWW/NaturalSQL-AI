@@ -157,29 +157,13 @@ else:
 ## toolkit
 toolkit = SQLDatabaseToolkit(db=db, llm=llm)
 
-# Custom system message to allow DML operations when explicitly requested
-custom_suffix = """
-IMPORTANT INSTRUCTIONS:
-- For QUESTIONS (e.g., "How many students?", "Show me data"), use SELECT queries to retrieve information.
-- For MODIFICATION REQUESTS (e.g., "Add a student", "Update marks", "Delete a record"), use INSERT/UPDATE/DELETE statements.
-- Always check the table schema first using sql_db_schema tool before performing operations.
-- After modifications, verify the result with a SELECT query.
-- Provide clear confirmation of what was done.
-
-Begin!
-
-Question: {input}
-Thought: I should check what tables exist and their schema to properly answer this question.
-{agent_scratchpad}"""
-
 # create agent with fallback if AgentType is unavailable
 agent_kwargs = dict(
     llm=llm, 
     toolkit=toolkit, 
     verbose=True, 
     max_iterations=max_iterations, 
-    handle_parsing_errors=True,
-    suffix=custom_suffix
+    handle_parsing_errors=True
 )
 
 if AgentType is not None:
@@ -243,10 +227,28 @@ if user_query:
         "query": user_query
     })
 
+    # Enhance user query with context to guide the agent
+    enhanced_query = f"""
+Context: You are interacting with a SQL database. You have the ability to execute all SQL operations including SELECT, INSERT, UPDATE, DELETE, and CREATE.
+
+User Request: {user_query}
+
+Instructions:
+- If the user is asking a QUESTION (e.g., "how many?", "show me", "list"), use SELECT to query and return the answer.
+- If the user wants to ADD/INSERT data (e.g., "add a student", "insert a row"), use INSERT and confirm success.
+- If the user wants to UPDATE data (e.g., "change marks", "update"), use UPDATE and confirm success.
+- If the user wants to DELETE data, use DELETE and confirm success.
+- If the user wants to CREATE/ALTER tables or schema, execute the DDL statement and confirm success.
+- ALWAYS execute the appropriate SQL command - do NOT just describe what to do.
+- After any modification, verify it worked by querying the result.
+
+Provide a clear, direct answer to the user's request.
+"""
+
     with st.chat_message("assistant"):
         streamlit_callback = StreamlitCallbackHandler(st.container())
         try:
-            response = agent.run(user_query, callbacks=[streamlit_callback])
+            response = agent.run(enhanced_query, callbacks=[streamlit_callback])
             st.session_state.messages.append({"role": "assistant", "content": response})
             st.write(response)
         except Exception as e:
