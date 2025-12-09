@@ -100,7 +100,7 @@ if not api_key:
 model_env = os.environ.get("GROQ_MODEL", "")
 fallback_env = os.environ.get("GROQ_FALLBACK_MODEL", "")
 with st.sidebar.expander("🔧 Advanced Settings"):
-    model_name = st.text_input("Groq model name (see Groq docs)", value=model_env or "llama3-70b-8192")
+    model_name = st.text_input("Groq model name (see Groq docs)", value=model_env or "llama-3.3-70b-versatile")
     max_iterations = st.slider("Max Agent Iterations", 5, 20, 15)
     temperature = st.slider("Temperature", 0.0, 1.0, 0.1)
 
