@@ -157,22 +157,31 @@ else:
 ## toolkit
 toolkit = SQLDatabaseToolkit(db=db, llm=llm)
 
-# Custom agent prefix to allow DML operations when explicitly requested
-custom_prefix = """
-You are an AI assistant designed to interact with SQL databases.
+# Custom system message to allow DML operations when explicitly requested
+custom_suffix = """
+IMPORTANT INSTRUCTIONS:
+- For QUESTIONS (e.g., "How many students?", "Show me data"), use SELECT queries to retrieve information.
+- For MODIFICATION REQUESTS (e.g., "Add a student", "Update marks", "Delete a record"), use INSERT/UPDATE/DELETE statements.
+- Always check the table schema first using sql_db_schema tool before performing operations.
+- After modifications, verify the result with a SELECT query.
+- Provide clear confirmation of what was done.
 
-IMPORTANT BEHAVIOR RULES:
-1. If the user asks a QUESTION about data (e.g., "How many students?", "What is the average?"), answer by querying the database using SELECT statements.
-2. If the user EXPLICITLY REQUESTS to modify data (e.g., "Add a student", "Update marks", "Delete record"), YOU MUST PERFORM the operation using appropriate DML statements (INSERT, UPDATE, DELETE).
-3. After performing any modification, confirm the operation was successful and show the result.
-4. If you encounter an error or cannot perform the operation, explain why and provide the exact SQL query that would accomplish the task.
-5. Always be careful with data modifications - if a request is ambiguous, ask for clarification before modifying data.
+Begin!
 
-You have access to tools for interacting with the database. Use them appropriately based on the user's request.
-"""
+Question: {input}
+Thought: I should check what tables exist and their schema to properly answer this question.
+{agent_scratchpad}"""
 
 # create agent with fallback if AgentType is unavailable
-agent_kwargs = dict(llm=llm, toolkit=toolkit, verbose=True, max_iterations=max_iterations, handle_parsing_errors=True, agent_executor_kwargs={"handle_parsing_errors": True})
+agent_kwargs = dict(
+    llm=llm, 
+    toolkit=toolkit, 
+    verbose=True, 
+    max_iterations=max_iterations, 
+    handle_parsing_errors=True,
+    suffix=custom_suffix
+)
+
 if AgentType is not None:
     try:
         agent_kwargs['agent_type'] = AgentType.ZERO_SHOT_REACT_DESCRIPTION
@@ -181,9 +190,6 @@ if AgentType is not None:
 else:
     # fallback to string name which some langchain helpers accept
     agent_kwargs['agent_type'] = 'zero-shot-react-description'
-
-# Add custom prefix to override default restrictions
-agent_kwargs['prefix'] = custom_prefix
 
 agent = create_sql_agent(**agent_kwargs)
 
