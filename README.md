@@ -88,7 +88,7 @@ The answer screenshot is a real run of the full pipeline on a local `gemma4:e4b`
 naturalsql/   guard, executor, pipeline, schema linking, memory, audit, API, CLI
   bench/      seeded retail DB, 115 attack payloads, 61 gold questions, evaluation code
 app.py        Streamlit app
-tests/        250 tests
+tests/        257 tests
 docs/         ARCHITECTURE.md, SECURITY.md, BENCHMARKS.md
 ```
 
