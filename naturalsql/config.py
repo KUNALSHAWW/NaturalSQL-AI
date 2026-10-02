@@ -21,7 +21,7 @@ PROVIDER_DEFAULTS = {
 
 @dataclass
 class Settings:
-    db_url: str = "sqlite:///student.db"
+    db_url: str = "sqlite:///demo_retail.db"
     provider: str = "groq"
     model: str = ""
     base_url: str = ""
@@ -60,7 +60,7 @@ class Settings:
         denied = {c.strip().lower() for c in os.environ.get("NATURALSQL_DENIED_COLUMNS", "").split(",") if c.strip()}
         allowed = {t.strip().lower() for t in os.environ.get("NATURALSQL_ALLOWED_TABLES", "").split(",") if t.strip()}
         return cls(
-            db_url=os.environ.get("NATURALSQL_DB_URL", "sqlite:///student.db"),
+            db_url=os.environ.get("NATURALSQL_DB_URL", "sqlite:///demo_retail.db"),
             provider=provider,
             model=os.environ.get("NATURALSQL_MODEL", ""),
             base_url=os.environ.get("NATURALSQL_BASE_URL", os.environ.get("OLLAMA_HOST", "") if provider == "ollama" else ""),
