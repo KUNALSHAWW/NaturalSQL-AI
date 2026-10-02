@@ -25,7 +25,6 @@ from ..config import Settings
 from ..executor import ReadOnlyExecutor
 from ..guard import SQLGuard
 from ..llm import LLMClient
-from ..memory import QueryMemory
 from ..pipeline import Text2SQL
 from . import retail_db
 

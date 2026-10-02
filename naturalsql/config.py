@@ -51,7 +51,7 @@ class Settings:
             self.parallel = False  # a local model serves one request at a time
 
     @classmethod
-    def from_env(cls) -> "Settings":
+    def from_env(cls) -> Settings:
         provider = os.environ.get("NATURALSQL_PROVIDER", "groq").lower()
         key = os.environ.get(
             "NATURALSQL_API_KEY",

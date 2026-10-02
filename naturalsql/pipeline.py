@@ -30,9 +30,6 @@ from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 
-import sqlglot
-from sqlglot import exp
-
 from .audit import AuditLog
 from .config import Settings
 from .executor import QueryError, ReadOnlyExecutor, ResultSet

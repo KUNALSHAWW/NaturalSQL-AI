@@ -19,7 +19,7 @@ import streamlit as st
 from naturalsql.api import build_engine
 from naturalsql.audit import AuditLog
 from naturalsql.bench import retail_db
-from naturalsql.bench.evaluate import bench_policy, load_adversarial
+from naturalsql.bench.evaluate import load_adversarial
 from naturalsql.config import Settings
 from naturalsql.executor import ReadOnlyExecutor
 from naturalsql.guard import SQLGuard

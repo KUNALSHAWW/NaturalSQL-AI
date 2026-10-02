@@ -102,7 +102,7 @@ class SchemaInfo:
         enum_threshold: int = 25,
         value_index_limit: int = 5000,
         skip_tables: set[str] | None = None,
-    ) -> "SchemaInfo":
+    ) -> SchemaInfo:
         insp = inspect(engine)
         dialect = engine.dialect.name
         dialect = {"postgresql": "postgres"}.get(dialect, dialect)
