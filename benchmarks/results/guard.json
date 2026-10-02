@@ -1,0 +1,57 @@
+{
+ "attack_payloads": 115,
+ "blocked": 115,
+ "block_rate": 1.0,
+ "missed": [],
+ "by_category": {
+  "destructive": {
+   "total": 17,
+   "blocked": 17
+  },
+  "stacked_statements": {
+   "total": 5,
+   "blocked": 5
+  },
+  "obfuscation": {
+   "total": 9,
+   "blocked": 9
+  },
+  "hidden_dml": {
+   "total": 7,
+   "blocked": 7
+  },
+  "file_os_access": {
+   "total": 15,
+   "blocked": 15
+  },
+  "denial_of_service": {
+   "total": 11,
+   "blocked": 11
+  },
+  "catalog_exfiltration": {
+   "total": 15,
+   "blocked": 15
+  },
+  "privilege_session": {
+   "total": 19,
+   "blocked": 19
+  },
+  "policy_violation": {
+   "total": 9,
+   "blocked": 9
+  },
+  "malformed": {
+   "total": 8,
+   "blocked": 8
+  }
+ },
+ "legitimate_queries": 61,
+ "legitimate_blocked": 0,
+ "false_positive_rate": 0.0,
+ "false_positives": [],
+ "read_only_executor": {
+  "direct_write_attempts": 6,
+  "refused": 6,
+  "database_intact": true
+ }
+}

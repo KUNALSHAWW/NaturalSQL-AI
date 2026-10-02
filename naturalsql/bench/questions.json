@@ -1,0 +1,429 @@
+[
+ {
+  "difficulty": "easy",
+  "question": "How many customers are there?",
+  "gold_sql": "SELECT COUNT(*) FROM customers",
+  "id": 1,
+  "n_rows": 1
+ },
+ {
+  "difficulty": "easy",
+  "question": "How many orders were cancelled?",
+  "gold_sql": "SELECT COUNT(*) FROM orders WHERE status = 'cancelled'",
+  "id": 2,
+  "n_rows": 1
+ },
+ {
+  "difficulty": "easy",
+  "question": "What is the average price of our products?",
+  "gold_sql": "SELECT AVG(price) FROM products",
+  "id": 3,
+  "n_rows": 1
+ },
+ {
+  "difficulty": "easy",
+  "question": "List the names of all product categories.",
+  "gold_sql": "SELECT name FROM categories",
+  "id": 4,
+  "n_rows": 7
+ },
+ {
+  "difficulty": "easy",
+  "question": "How many customers are from India?",
+  "gold_sql": "SELECT COUNT(*) FROM customers WHERE country = 'India'",
+  "id": 5,
+  "n_rows": 1
+ },
+ {
+  "difficulty": "easy",
+  "question": "What is the name of the most expensive product?",
+  "gold_sql": "SELECT name FROM products ORDER BY price DESC LIMIT 1",
+  "id": 6,
+  "n_rows": 1
+ },
+ {
+  "difficulty": "easy",
+  "question": "How many employees work in Engineering?",
+  "gold_sql": "SELECT COUNT(*) FROM employees WHERE department = 'Engineering'",
+  "id": 7,
+  "n_rows": 1
+ },
+ {
+  "difficulty": "easy",
+  "question": "What is the total salary paid in the Finance department?",
+  "gold_sql": "SELECT SUM(salary) FROM employees WHERE department = 'Finance'",
+  "id": 8,
+  "n_rows": 1
+ },
+ {
+  "difficulty": "easy",
+  "question": "How many products are out of stock?",
+  "gold_sql": "SELECT COUNT(*) FROM products WHERE stock = 0",
+  "id": 9,
+  "n_rows": 1
+ },
+ {
+  "difficulty": "easy",
+  "question": "How many customers are in the Corporate segment?",
+  "gold_sql": "SELECT COUNT(*) FROM customers WHERE segment = 'Corporate'",
+  "id": 10,
+  "n_rows": 1
+ },
+ {
+  "difficulty": "easy",
+  "question": "What is the highest order total?",
+  "gold_sql": "SELECT MAX(total) FROM orders",
+  "id": 11,
+  "n_rows": 1
+ },
+ {
+  "difficulty": "easy",
+  "question": "How many different countries do our customers come from?",
+  "gold_sql": "SELECT COUNT(DISTINCT country) FROM customers",
+  "id": 12,
+  "n_rows": 1
+ },
+ {
+  "difficulty": "easy",
+  "question": "How many orders were placed in 2024?",
+  "gold_sql": "SELECT COUNT(*) FROM orders WHERE strftime('%Y', created_at) = '2024'",
+  "id": 13,
+  "n_rows": 1
+ },
+ {
+  "difficulty": "easy",
+  "question": "How many products cost more than 100?",
+  "gold_sql": "SELECT COUNT(*) FROM products WHERE price > 100",
+  "id": 14,
+  "n_rows": 1
+ },
+ {
+  "difficulty": "easy",
+  "question": "Which employee earns the most?",
+  "gold_sql": "SELECT name FROM employees ORDER BY salary DESC LIMIT 1",
+  "id": 15,
+  "n_rows": 1
+ },
+ {
+  "difficulty": "easy",
+  "question": "How many orders are still processing?",
+  "gold_sql": "SELECT COUNT(*) FROM orders WHERE status = 'processing'",
+  "id": 16,
+  "n_rows": 1
+ },
+ {
+  "difficulty": "easy",
+  "question": "How many customers signed up in 2023?",
+  "gold_sql": "SELECT COUNT(*) FROM customers WHERE strftime('%Y', signup_date) = '2023'",
+  "id": 17,
+  "n_rows": 1
+ },
+ {
+  "difficulty": "easy",
+  "question": "What is the cheapest product called?",
+  "gold_sql": "SELECT name FROM products ORDER BY price ASC LIMIT 1",
+  "id": 18,
+  "n_rows": 1
+ },
+ {
+  "difficulty": "easy",
+  "question": "How many users have the admin role?",
+  "gold_sql": "SELECT COUNT(*) FROM users WHERE role = 'admin'",
+  "id": 19,
+  "n_rows": 1
+ },
+ {
+  "difficulty": "easy",
+  "question": "How many orders have a total above 500?",
+  "gold_sql": "SELECT COUNT(*) FROM orders WHERE total > 500",
+  "id": 20,
+  "n_rows": 1
+ },
+ {
+  "difficulty": "medium",
+  "question": "How many customers are there in each country?",
+  "gold_sql": "SELECT country, COUNT(*) FROM customers GROUP BY country",
+  "id": 21,
+  "n_rows": 8
+ },
+ {
+  "difficulty": "medium",
+  "question": "What is the total revenue from delivered orders?",
+  "gold_sql": "SELECT SUM(total) FROM orders WHERE status = 'delivered'",
+  "id": 22,
+  "n_rows": 1
+ },
+ {
+  "difficulty": "medium",
+  "question": "How many products are in each category? Show the category name and the count.",
+  "gold_sql": "SELECT c.name, COUNT(*) FROM products p JOIN categories c ON p.category_id = c.id GROUP BY c.name",
+  "id": 23,
+  "n_rows": 7
+ },
+ {
+  "difficulty": "medium",
+  "question": "What is the average order total for each customer country?",
+  "gold_sql": "SELECT c.country, AVG(o.total) FROM orders o JOIN customers c ON o.customer_id = c.id GROUP BY c.country",
+  "id": 24,
+  "n_rows": 8
+ },
+ {
+  "difficulty": "medium",
+  "question": "Which country has the most customers?",
+  "gold_sql": "SELECT country FROM customers GROUP BY country ORDER BY COUNT(*) DESC LIMIT 1",
+  "id": 25,
+  "n_rows": 1
+ },
+ {
+  "difficulty": "medium",
+  "question": "Who are the top 3 customers by total order value?",
+  "gold_sql": "SELECT c.name FROM customers c JOIN orders o ON o.customer_id = c.id GROUP BY c.id ORDER BY SUM(o.total) DESC LIMIT 3",
+  "id": 26,
+  "n_rows": 3
+ },
+ {
+  "difficulty": "medium",
+  "question": "How many orders were placed by customers in the Corporate segment?",
+  "gold_sql": "SELECT COUNT(*) FROM orders o JOIN customers c ON o.customer_id = c.id WHERE c.segment = 'Corporate'",
+  "id": 27,
+  "n_rows": 1
+ },
+ {
+  "difficulty": "medium",
+  "question": "What is the total quantity sold in each category? Show the category name and quantity.",
+  "gold_sql": "SELECT c.name, SUM(oi.quantity) FROM order_items oi JOIN products p ON oi.product_id = p.id JOIN categories c ON p.category_id = c.id GROUP BY c.name",
+  "id": 28,
+  "n_rows": 7
+ },
+ {
+  "difficulty": "medium",
+  "question": "Which category generated the most revenue from order items (quantity times unit price)?",
+  "gold_sql": "SELECT c.name FROM order_items oi JOIN products p ON oi.product_id = p.id JOIN categories c ON p.category_id = c.id GROUP BY c.name ORDER BY SUM(oi.quantity * oi.unit_price) DESC LIMIT 1",
+  "id": 29,
+  "n_rows": 1
+ },
+ {
+  "difficulty": "medium",
+  "question": "How many customers have never placed an order?",
+  "gold_sql": "SELECT COUNT(*) FROM customers WHERE id NOT IN (SELECT customer_id FROM orders)",
+  "id": 30,
+  "n_rows": 1
+ },
+ {
+  "difficulty": "medium",
+  "question": "What is the average salary in each department?",
+  "gold_sql": "SELECT department, AVG(salary) FROM employees GROUP BY department",
+  "id": 31,
+  "n_rows": 5
+ },
+ {
+  "difficulty": "medium",
+  "question": "Which department has the highest average salary?",
+  "gold_sql": "SELECT department FROM employees GROUP BY department ORDER BY AVG(salary) DESC LIMIT 1",
+  "id": 32,
+  "n_rows": 1
+ },
+ {
+  "difficulty": "medium",
+  "question": "How many orders are there in each status?",
+  "gold_sql": "SELECT status, COUNT(*) FROM orders GROUP BY status",
+  "id": 33,
+  "n_rows": 5
+ },
+ {
+  "difficulty": "medium",
+  "question": "Which customers have placed more than 11 orders? List their names.",
+  "gold_sql": "SELECT c.name FROM customers c JOIN orders o ON o.customer_id = c.id GROUP BY c.id HAVING COUNT(*) > 11",
+  "id": 34,
+  "n_rows": 8
+ },
+ {
+  "difficulty": "medium",
+  "question": "How many orders were placed in each month of 2024? Show the month and the count.",
+  "gold_sql": "SELECT strftime('%Y-%m', created_at) AS month, COUNT(*) FROM orders WHERE strftime('%Y', created_at) = '2024' GROUP BY month",
+  "id": 35,
+  "n_rows": 12
+ },
+ {
+  "difficulty": "medium",
+  "question": "What are the top 5 products by total quantity sold?",
+  "gold_sql": "SELECT p.name FROM order_items oi JOIN products p ON oi.product_id = p.id GROUP BY p.id ORDER BY SUM(oi.quantity) DESC LIMIT 5",
+  "id": 36,
+  "n_rows": 5
+ },
+ {
+  "difficulty": "medium",
+  "question": "How many units of Electronics products were sold in total?",
+  "gold_sql": "SELECT SUM(oi.quantity) FROM order_items oi JOIN products p ON oi.product_id = p.id JOIN categories c ON p.category_id = c.id WHERE c.name = 'Electronics'",
+  "id": 37,
+  "n_rows": 1
+ },
+ {
+  "difficulty": "medium",
+  "question": "What is the average number of items per order?",
+  "gold_sql": "SELECT AVG(n) FROM (SELECT COUNT(*) AS n FROM order_items GROUP BY order_id)",
+  "id": 38,
+  "n_rows": 1
+ },
+ {
+  "difficulty": "medium",
+  "question": "Which customers from France placed an order over 600? List distinct names.",
+  "gold_sql": "SELECT DISTINCT c.name FROM customers c JOIN orders o ON o.customer_id = c.id WHERE c.country = 'France' AND o.total > 600",
+  "id": 39,
+  "n_rows": 1
+ },
+ {
+  "difficulty": "medium",
+  "question": "What is the total revenue in 2024 from orders that were not cancelled?",
+  "gold_sql": "SELECT SUM(total) FROM orders WHERE strftime('%Y', created_at) = '2024' AND status <> 'cancelled'",
+  "id": 40,
+  "n_rows": 1
+ },
+ {
+  "difficulty": "medium",
+  "question": "How many products have fewer than 50 units in stock?",
+  "gold_sql": "SELECT COUNT(*) FROM products WHERE stock < 50",
+  "id": 41,
+  "n_rows": 1
+ },
+ {
+  "difficulty": "medium",
+  "question": "List each department with its number of employees, largest first.",
+  "gold_sql": "SELECT department, COUNT(*) FROM employees GROUP BY department ORDER BY COUNT(*) DESC",
+  "id": 42,
+  "n_rows": 5
+ },
+ {
+  "difficulty": "medium",
+  "question": "What percentage of orders were cancelled? Round to 2 decimals.",
+  "gold_sql": "SELECT ROUND(100.0 * SUM(CASE WHEN status = 'cancelled' THEN 1 ELSE 0 END) / COUNT(*), 2) FROM orders",
+  "id": 43,
+  "n_rows": 1
+ },
+ {
+  "difficulty": "medium",
+  "question": "What is the total value of returned orders from Corporate customers?",
+  "gold_sql": "SELECT SUM(o.total) FROM orders o JOIN customers c ON o.customer_id = c.id WHERE o.status = 'returned' AND c.segment = 'Corporate'",
+  "id": 44,
+  "n_rows": 1
+ },
+ {
+  "difficulty": "medium",
+  "question": "How many employees report directly to each manager? Show the manager name and the count.",
+  "gold_sql": "SELECT m.name, COUNT(*) FROM employees e JOIN employees m ON e.manager_id = m.id GROUP BY m.id",
+  "id": 45,
+  "n_rows": 5
+ },
+ {
+  "difficulty": "hard",
+  "question": "How many customers have a total order value above the average total order value per customer?",
+  "gold_sql": "SELECT COUNT(*) FROM (SELECT customer_id, SUM(total) AS s FROM orders GROUP BY customer_id) WHERE s > (SELECT AVG(s2) FROM (SELECT SUM(total) AS s2 FROM orders GROUP BY customer_id))",
+  "id": 46,
+  "n_rows": 1
+ },
+ {
+  "difficulty": "hard",
+  "question": "For each country, who is the top spending customer? Show country and customer name.",
+  "gold_sql": "SELECT country, name FROM (SELECT c.country, c.name, SUM(o.total) AS spent, ROW_NUMBER() OVER (PARTITION BY c.country ORDER BY SUM(o.total) DESC) AS rn FROM customers c JOIN orders o ON o.customer_id = c.id GROUP BY c.id) WHERE rn = 1",
+  "id": 47,
+  "n_rows": 8
+ },
+ {
+  "difficulty": "hard",
+  "question": "Which month had the highest revenue in 2024?",
+  "gold_sql": "SELECT strftime('%Y-%m', created_at) AS m FROM orders WHERE strftime('%Y', created_at) = '2024' GROUP BY m ORDER BY SUM(total) DESC LIMIT 1",
+  "id": 48,
+  "n_rows": 1
+ },
+ {
+  "difficulty": "hard",
+  "question": "How many customers placed orders in both 2023 and 2024?",
+  "gold_sql": "SELECT COUNT(*) FROM (SELECT customer_id FROM orders WHERE strftime('%Y', created_at) = '2023' INTERSECT SELECT customer_id FROM orders WHERE strftime('%Y', created_at) = '2024')",
+  "id": 49,
+  "n_rows": 1
+ },
+ {
+  "difficulty": "hard",
+  "question": "Compare the average order total of customers who signed up in 2023 with those who signed up in 2024. Show the signup year and the average.",
+  "gold_sql": "SELECT strftime('%Y', c.signup_date) AS yr, AVG(o.total) FROM orders o JOIN customers c ON o.customer_id = c.id GROUP BY yr",
+  "id": 50,
+  "n_rows": 2
+ },
+ {
+  "difficulty": "hard",
+  "question": "Which employees earn more than their manager? List their names.",
+  "gold_sql": "SELECT e.name FROM employees e JOIN employees m ON e.manager_id = m.id WHERE e.salary > m.salary",
+  "id": 51,
+  "n_rows": 13
+ },
+ {
+  "difficulty": "hard",
+  "question": "Which product category has the highest average product price?",
+  "gold_sql": "SELECT c.name FROM products p JOIN categories c ON p.category_id = c.id GROUP BY c.id ORDER BY AVG(p.price) DESC LIMIT 1",
+  "id": 52,
+  "n_rows": 1
+ },
+ {
+  "difficulty": "hard",
+  "question": "How many orders contain more than one distinct product?",
+  "gold_sql": "SELECT COUNT(*) FROM (SELECT order_id FROM order_items GROUP BY order_id HAVING COUNT(DISTINCT product_id) > 1)",
+  "id": 53,
+  "n_rows": 1
+ },
+ {
+  "difficulty": "hard",
+  "question": "Which three countries have the highest average order total? List them from highest to lowest.",
+  "gold_sql": "SELECT c.country FROM orders o JOIN customers c ON o.customer_id = c.id GROUP BY c.country ORDER BY AVG(o.total) DESC LIMIT 3",
+  "id": 54,
+  "n_rows": 3
+ },
+ {
+  "difficulty": "hard",
+  "question": "What fraction of customers have placed at least one order? Round to 3 decimals.",
+  "gold_sql": "SELECT ROUND(1.0 * (SELECT COUNT(DISTINCT customer_id) FROM orders) / (SELECT COUNT(*) FROM customers), 3)",
+  "id": 55,
+  "n_rows": 1
+ },
+ {
+  "difficulty": "hard",
+  "question": "How many customers have bought products from at least 5 different categories?",
+  "gold_sql": "SELECT COUNT(*) FROM (SELECT o.customer_id FROM orders o JOIN order_items oi ON oi.order_id = o.id JOIN products p ON oi.product_id = p.id GROUP BY o.customer_id HAVING COUNT(DISTINCT p.category_id) >= 5)",
+  "id": 56,
+  "n_rows": 1
+ },
+ {
+  "difficulty": "hard",
+  "question": "What is the name of the second most expensive Electronics product?",
+  "gold_sql": "SELECT p.name FROM products p JOIN categories c ON p.category_id = c.id WHERE c.name = 'Electronics' ORDER BY p.price DESC LIMIT 1 OFFSET 1",
+  "id": 57,
+  "n_rows": 1
+ },
+ {
+  "difficulty": "hard",
+  "question": "Which year and month combination had the most orders?",
+  "gold_sql": "SELECT strftime('%Y-%m', created_at) AS m FROM orders GROUP BY m ORDER BY COUNT(*) DESC LIMIT 1",
+  "id": 58,
+  "n_rows": 1
+ },
+ {
+  "difficulty": "hard",
+  "question": "What is the average amount spent per customer in each segment? Count only customers who placed at least one order.",
+  "gold_sql": "SELECT segment, AVG(s) FROM (SELECT c.segment AS segment, SUM(o.total) AS s FROM customers c JOIN orders o ON o.customer_id = c.id GROUP BY c.id) GROUP BY segment",
+  "id": 59,
+  "n_rows": 3
+ },
+ {
+  "difficulty": "hard",
+  "question": "For each category, what is the name of the product with the highest total quantity sold?",
+  "gold_sql": "SELECT category, product FROM (SELECT c.name AS category, p.name AS product, SUM(oi.quantity) AS qty, ROW_NUMBER() OVER (PARTITION BY c.name ORDER BY SUM(oi.quantity) DESC) AS rn FROM order_items oi JOIN products p ON oi.product_id = p.id JOIN categories c ON p.category_id = c.id GROUP BY p.id) WHERE rn = 1",
+  "id": 60,
+  "n_rows": 7
+ },
+ {
+  "difficulty": "hard",
+  "question": "How many items were in cancelled orders in total?",
+  "gold_sql": "SELECT SUM(oi.quantity) FROM order_items oi JOIN orders o ON oi.order_id = o.id WHERE o.status = 'cancelled'",
+  "id": 61,
+  "n_rows": 1
+ }
+]
