@@ -2,6 +2,8 @@
 
 A natural-language interface to SQL databases where **the model is never trusted**. Every query an LLM writes is parsed into an AST, checked against a policy, executed on a read-only connection, and cross-checked against other candidate queries before an answer is returned.
 
+<p align="center"><img src="docs/screenshots/ask.png" alt="NaturalSQL: a verified answer with confidence, SQL and explanation" width="900"></p>
+
 ```
 question ─► schema linking ─► N candidate SQL queries (LLM) ─► AST guard ─► read-only execution
                                       ▲                            │              │
@@ -61,6 +63,17 @@ make bench-guard                                   # no model needed, runs in CI
 make bench PROVIDER=ollama MODEL=gemma4:e4b        # accuracy, injection, throughput
 ```
 
+### Screenshots
+
+<table>
+<tr>
+<td width="50%"><img src="docs/screenshots/security_blocked.png" alt="Security playground blocking a stacked DROP TABLE"><br><sub>Security playground: a stacked `DROP TABLE` is blocked before it can run</sub></td>
+<td width="50%"><img src="docs/screenshots/security_allowed.png" alt="Security playground allowing a read-only query"><br><sub>A valid query is allowed and re-rendered from the validated tree</sub></td>
+</tr>
+</table>
+
+The answer screenshot is a real run of the full pipeline on a local `gemma4:e4b` model (CPU only, so latency is high). The interface uses the same dark design system as the other projects in this portfolio: near-black canvas, graphite surfaces, one emerald accent, in the style of modern developer tools.
+
 ## Honest limitations
 
 - The guard stops writes, exfiltration, DoS functions and policy violations. It cannot tell whether a *valid* SELECT answers the question correctly. Accuracy comes from the model, voting and repair, and is measured above.
@@ -75,7 +88,7 @@ make bench PROVIDER=ollama MODEL=gemma4:e4b        # accuracy, injection, throug
 naturalsql/   guard, executor, pipeline, schema linking, memory, audit, API, CLI
   bench/      seeded retail DB, 115 attack payloads, 61 gold questions, evaluation code
 app.py        Streamlit app
-tests/        246 tests
+tests/        250 tests
 docs/         ARCHITECTURE.md, SECURITY.md, BENCHMARKS.md
 ```
 

@@ -14,8 +14,10 @@ import tempfile
 from pathlib import Path
 
 import pandas as pd
+import plotly.graph_objects as go
 import streamlit as st
 
+from naturalsql import ui_theme as ui
 from naturalsql.api import build_engine
 from naturalsql.audit import AuditLog
 from naturalsql.bench import retail_db
@@ -32,7 +34,8 @@ RESULTS = ROOT / "benchmarks" / "results"
 WORK = Path(tempfile.gettempdir()) / "naturalsql_app"
 WORK.mkdir(exist_ok=True)
 
-st.set_page_config(page_title="NaturalSQL", page_icon="🛡️", layout="wide")
+ACCENT = "#34D399"
+ui.apply(ACCENT, "NaturalSQL", "◆")
 
 EXAMPLES = [
     "How many customers are there in each country?",
@@ -44,7 +47,7 @@ EXAMPLES = [
 
 
 # ------------------------------------------------------------------ sidebar
-st.sidebar.title("NaturalSQL")
+st.sidebar.markdown("### NaturalSQL")
 st.sidebar.caption("Ask your database in English. Every query is parsed, validated and run read-only.")
 
 source = st.sidebar.radio("Database", ["Demo retail database", "Upload a SQLite file", "Connection URL"])
@@ -99,6 +102,13 @@ def readonly_parts():
     return ex, schema, guard
 
 
+ui.hero(
+    "Safe natural-language SQL",
+    "Ask your database in English. Trust none of it.",
+    "Every query the model writes is parsed into an AST, validated against a policy, executed on a read-only "
+    "connection and cross-checked against other candidates before you see an answer.",
+    [("AST guard", "accent"), ("Read-only executor", "ok"), ("Candidate voting", "neutral"), ("Audit log", "neutral")],
+)
 tab_ask, tab_sec, tab_audit, tab_bench = st.tabs(["Ask", "Security playground", "Audit log", "Benchmarks"])
 
 # ------------------------------------------------------------------ ask
@@ -128,11 +138,9 @@ with tab_ask:
 
     a = st.session_state.get("answer")
     if a:
-        st.markdown(f"**You asked:** {a.question}")
-        colors = {"ok": "green", "blocked": "red", "no_answer": "orange", "failed": "red"}
-        st.markdown(f":{colors[a.status]}[**{a.status.replace('_', ' ').upper()}**]")
-        if a.message:
-            st.write(a.message)
+        tones = {"ok": "ok", "blocked": "bad", "no_answer": "warn", "failed": "bad"}
+        ui.banner(a.status.replace("_", " "), a.message or (a.agreement if a.status == "ok" else a.question), tones[a.status])
+        st.caption(f"You asked: {a.question}")
         if a.status == "ok":
             m1, m2, m3, m4 = st.columns(4)
             m1.metric("Confidence", f"{a.confidence:.0%}", help=a.agreement)
@@ -147,7 +155,13 @@ with tab_ask:
                 st.dataframe(df, use_container_width=True, hide_index=True)
                 if ch.get("type") in ("bar", "line") and len(df) > 1:
                     y = ch["y"] if isinstance(ch["y"], list) else [ch["y"]]
-                    (st.bar_chart if ch["type"] == "bar" else st.line_chart)(df.set_index(ch["x"])[y])
+                    fig = go.Figure()
+                    for col in y:
+                        if ch["type"] == "bar":
+                            fig.add_bar(x=df[ch["x"]], y=df[col], name=col)
+                        else:
+                            fig.add_scatter(x=df[ch["x"]], y=df[col], name=col, mode="lines+markers")
+                    st.plotly_chart(ui.style_fig(fig, ACCENT, 340), use_container_width=True)
             if a.masked_columns:
                 st.caption("Masked columns: " + ", ".join(a.masked_columns))
             st.code(a.sql, language="sql")
@@ -174,7 +188,7 @@ with tab_ask:
 
 # ------------------------------------------------------------------ security playground
 with tab_sec:
-    st.subheader("Try to get past the guard")
+    ui.section("Try to get past the guard", "Paste any SQL or load a payload from the 115-attack corpus.")
     st.write("Every generated query is parsed into a syntax tree and validated before it can run: one read-only statement, "
              "no write or admin operations anywhere in the tree (including inside subqueries), no dangerous functions, "
              "only known tables, no restricted columns, a row limit. Paste any SQL, or load a real attack payload.")
@@ -190,7 +204,7 @@ with tab_sec:
         ex, schema, guard = readonly_parts()
         res = guard.check(sql)
         if res.ok:
-            st.success("Allowed. This is the query that would actually run (regenerated from the validated tree):")
+            ui.banner("allowed", "This is the query that would actually run, regenerated from the validated tree.", "ok")
             st.code(res.sql, language="sql")
             if st.button("Run it on the read-only connection"):
                 try:
@@ -199,9 +213,7 @@ with tab_sec:
                 except Exception as e:  # noqa: BLE001
                     st.error(str(e))
         else:
-            st.error("Blocked")
-            for reason in res.reasons:
-                st.write("- " + reason)
+            ui.banner("blocked", "; ".join(res.reasons), "bad")
         st.caption("The guard is one layer. The database connection is also opened read-only, so even a parser bypass cannot write.")
 
 # ------------------------------------------------------------------ audit
@@ -217,15 +229,42 @@ with tab_audit:
 
 # ------------------------------------------------------------------ benchmarks
 with tab_bench:
-    shown = False
-    for name, title in (("guard", "SQL guard"), ("accuracy", "Execution accuracy"), ("injection", "Prompt injection"),):
-        p = RESULTS / f"{name}.json"
-        if p.exists():
-            shown = True
-            d = json.loads(p.read_text())
-            st.subheader(title)
-            d.pop("per_question", None)
-            d.pop("detail", None)
-            st.json(d, expanded=False)
-    if not shown:
+    def _load(name):
+        f = RESULTS / f"{name}.json"
+        return json.loads(f.read_text()) if f.exists() else None
+
+    guard, acc, inj = _load("guard"), _load("accuracy"), _load("injection")
+    if not (guard or acc or inj):
         st.info("Run `python -m naturalsql bench all` to generate benchmarks/results/*.json.")
+    if guard:
+        ui.section("SQL guard", "Adversarial payloads replayed against the AST guard, no model involved.")
+        ui.cards([
+            ("Attacks blocked", f"{guard['blocked']} / {guard['attack_payloads']}", "10 categories"),
+            ("False positives", f"{guard['legitimate_blocked']} / {guard['legitimate_queries']}", "legitimate queries"),
+            ("Direct writes refused", f"{guard['read_only_executor']['refused']} / {guard['read_only_executor']['direct_write_attempts']}", "read-only executor"),
+        ])
+        cat = guard["by_category"]
+        fig = go.Figure(go.Bar(x=[v["blocked"] / v["total"] for v in cat.values()], y=[k.replace("_", " ") for k in cat], orientation="h",
+                               marker_color=ACCENT, text=[f"{v['blocked']}/{v['total']}" for v in cat.values()], textposition="outside"))
+        st.plotly_chart(ui.style_fig(fig, ACCENT, 340).update_xaxes(range=[0, 1.15], tickformat=".0%"), use_container_width=True)
+    if acc:
+        ui.section("Execution accuracy", f"{acc['n_questions']} questions, result-set equality against gold SQL.")
+        ea = acc["execution_accuracy"]
+        labels = {"baseline_single_shot_full_schema": "Single shot", "single_shot_with_schema_linking": "+ schema linking",
+                  "plus_error_repair": "+ error repair", "plus_execution_voting_full_system": "+ voting (full)"}
+        fig = go.Figure()
+        for tier, color in (("easy", "#3DD68C"), ("medium", ACCENT), ("hard", "#F5B93E"), ("overall", "#EDEEF0")):
+            fig.add_bar(name=tier, x=[labels[k] for k in ea], y=[ea[k][tier] for k in ea], marker_color=color)
+        st.plotly_chart(ui.style_fig(fig, ACCENT, 340).update_layout(barmode="group").update_yaxes(tickformat=".0%", range=[0, 1.05]),
+                        use_container_width=True)
+        cal = acc["confidence_calibration"]
+        ui.cards([
+            ("Unanimous candidates", f"{cal['unanimous_answers']['accuracy']:.0%}", f"correct, n={cal['unanimous_answers']['n']}"),
+            ("Split candidates", f"{cal['split_answers']['accuracy']:.0%}", f"correct, n={cal['split_answers']['n']}"),
+            ("Full pipeline cost", f"{acc['cost']['full_mean_latency_s'] / acc['cost']['baseline_mean_latency_s']:.1f}x latency",
+             f"{acc['cost']['full_mean_llm_calls']:.1f} model calls per question"),
+        ])
+    if inj:
+        ui.section("Prompt injection", f"{inj['prompts']} adversarial prompts through the full pipeline.")
+        ui.cards([("Attacks succeeded", f"{inj['attacks_succeeded']} / {inj['prompts']}", ""),
+                  *[(k, str(v), "") for k, v in inj["outcomes"].items()]])
