@@ -128,14 +128,21 @@ class OpenAICompatClient:
 
 
 class OllamaClient:
-    """Local Ollama server. Uses Ollama's own token counters and timings."""
+    """Ollama server, local or Ollama Cloud (``https://ollama.com`` with an API key).
 
-    def __init__(self, model: str, base_url: str = "http://localhost:11434", timeout: float = 600.0, think: bool | None = False):
+    Uses the native ``/api/chat`` endpoint and Ollama's own token counters and timings. With an
+    ``api_key`` the request carries ``Authorization: Bearer <key>``, which is how Ollama Cloud
+    authenticates. ``think=None`` leaves the field out, which hosted reasoning models prefer.
+    """
+
+    def __init__(self, model: str, base_url: str = "http://localhost:11434", timeout: float = 600.0,
+                 think: bool | None = False, api_key: str = ""):
         self.model = model
         self.base_url = base_url.rstrip("/")
         self.timeout = timeout
         self.think = think
-        self.name = f"ollama:{model}"
+        self.api_key = api_key
+        self.name = f"{'ollama-cloud' if api_key else 'ollama'}:{model}"
 
     def complete(self, messages: Messages, temperature: float = 0.0, max_tokens: int = 400) -> LLMResponse:
         body = {
@@ -146,7 +153,8 @@ class OllamaClient:
             body["think"] = self.think
         t0 = time.perf_counter()
         try:
-            r = httpx.post(f"{self.base_url}/api/chat", json=body, timeout=self.timeout)
+            headers = {"Authorization": f"Bearer {self.api_key}"} if self.api_key else {}
+            r = httpx.post(f"{self.base_url}/api/chat", json=body, headers=headers, timeout=self.timeout)
             r.raise_for_status()
         except httpx.HTTPError as e:
             raise LLMError(f"{self.name}: {e}") from e
@@ -189,6 +197,10 @@ class FakeLLM:
 def make_client(settings: Settings):
     if settings.provider == "ollama":
         return OllamaClient(settings.model, settings.base_url)
+    if settings.provider == "ollama_cloud":
+        if not settings.api_key:
+            raise LLMError("no API key for provider 'ollama_cloud' (set OLLAMA_API_KEY)")
+        return OllamaClient(settings.model, settings.base_url, api_key=settings.api_key, think=None)
     if settings.provider in ("groq", "openai"):
         if not settings.api_key:
             raise LLMError(f"no API key for provider '{settings.provider}' (set NATURALSQL_API_KEY or GROQ_API_KEY/OPENAI_API_KEY)")

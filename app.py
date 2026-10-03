@@ -74,8 +74,9 @@ extra_denied = st.sidebar.text_input("Restricted columns (comma separated)", val
 denied = policy_denied | {c.strip().lower() for c in extra_denied.split(",") if c.strip()}
 
 st.sidebar.subheader("Language model")
-provider = st.sidebar.selectbox("Provider", ["groq", "openai", "ollama"], format_func=lambda p: {"groq": "Groq", "openai": "OpenAI", "ollama": "Ollama (local)"}[p])
-api_key = st.sidebar.text_input("API key", type="password", help="Not needed for Ollama") if provider != "ollama" else ""
+provider = st.sidebar.selectbox("Provider", ["groq", "openai", "ollama", "ollama_cloud"],
+                                 format_func=lambda p: {"groq": "Groq", "openai": "OpenAI", "ollama": "Ollama (local)", "ollama_cloud": "Ollama Cloud"}[p])
+api_key = st.sidebar.text_input("API key", type="password", help="Not needed for local Ollama. For Ollama Cloud, paste your OLLAMA_API_KEY") if provider != "ollama" else ""
 model = st.sidebar.text_input("Model (blank for default)", value="")
 n_cand = st.sidebar.slider("Candidate queries", 1, 5, 3, help="More candidates means more agreement evidence and more tokens")
 repairs = st.sidebar.slider("Repair attempts", 0, 3, 2)
