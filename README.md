@@ -50,6 +50,7 @@ Small sample sizes are stated, not hidden: 61 questions means one question is 1.
 pip install -r requirements.txt && pip install -e .
 python -m naturalsql make-demo-db --out demo_retail.db
 export GROQ_API_KEY=...                      # or: --provider ollama --model gemma4:e4b
+                                             # or hosted Ollama models: --provider ollama_cloud --model gpt-oss:120b (needs OLLAMA_API_KEY)
 python -m naturalsql ask "Which five customers spent the most in 2023?" --db demo_retail.db
 streamlit run app.py
 ```
@@ -88,7 +89,7 @@ The answer screenshot is a real run of the full pipeline on a local `gemma4:e4b`
 naturalsql/   guard, executor, pipeline, schema linking, memory, audit, API, CLI
   bench/      seeded retail DB, 115 attack payloads, 61 gold questions, evaluation code
 app.py        Streamlit app
-tests/        257 tests
+tests/        261 tests
 docs/         ARCHITECTURE.md, SECURITY.md, BENCHMARKS.md
 ```
 

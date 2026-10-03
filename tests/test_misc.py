@@ -76,7 +76,7 @@ def test_openai_compatible_client_parses_usage(monkeypatch):
 
 
 def test_ollama_client_uses_server_timings(monkeypatch):
-    def fake_post(url, json=None, timeout=None):
+    def fake_post(url, json=None, headers=None, timeout=None):
         assert url.endswith("/api/chat") and json["think"] is False
         return httpx.Response(200, request=httpx.Request("POST", url), json={
             "message": {"content": "SELECT 1"}, "eval_count": 50, "eval_duration": 2_000_000_000, "prompt_eval_count": 90})
