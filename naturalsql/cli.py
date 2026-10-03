@@ -94,7 +94,7 @@ def main(argv: list[str] | None = None) -> None:
 
     def common(p):
         p.add_argument("--db", help="SQLite file path or SQLAlchemy URL")
-        p.add_argument("--provider", choices=["groq", "openai", "ollama"])
+        p.add_argument("--provider", choices=["groq", "openai", "ollama", "ollama_cloud"])
         p.add_argument("--model")
 
     p = sub.add_parser("ask", help="ask one question")

@@ -16,7 +16,10 @@ PROVIDER_DEFAULTS = {
     "groq": ("https://api.groq.com/openai/v1", "llama-3.3-70b-versatile"),
     "openai": ("https://api.openai.com/v1", "gpt-4o-mini"),
     "ollama": ("http://localhost:11434", "llama3.1:8b"),
+    "ollama_cloud": ("https://ollama.com", "gpt-oss:120b"),
 }
+
+PROVIDER_KEY_ENV = {"groq": "GROQ_API_KEY", "openai": "OPENAI_API_KEY", "ollama_cloud": "OLLAMA_API_KEY"}
 
 
 @dataclass
@@ -44,7 +47,10 @@ class Settings:
     memory_path: str = "naturalsql_memory.db"
 
     def __post_init__(self) -> None:
+        self.provider = self.provider.lower().replace("-", "_")
         base, model = PROVIDER_DEFAULTS.get(self.provider, ("", ""))
+        if not self.api_key:
+            self.api_key = os.environ.get(PROVIDER_KEY_ENV.get(self.provider, ""), "")
         self.base_url = self.base_url or base
         self.model = self.model or model
         if self.provider == "ollama":
@@ -55,7 +61,7 @@ class Settings:
         provider = os.environ.get("NATURALSQL_PROVIDER", "groq").lower()
         key = os.environ.get(
             "NATURALSQL_API_KEY",
-            os.environ.get({"groq": "GROQ_API_KEY", "openai": "OPENAI_API_KEY"}.get(provider, ""), ""),
+            os.environ.get(PROVIDER_KEY_ENV.get(provider.replace("-", "_"), ""), ""),
         )
         denied = {c.strip().lower() for c in os.environ.get("NATURALSQL_DENIED_COLUMNS", "").split(",") if c.strip()}
         allowed = {t.strip().lower() for t in os.environ.get("NATURALSQL_ALLOWED_TABLES", "").split(",") if t.strip()}
