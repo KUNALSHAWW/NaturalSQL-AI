@@ -1,0 +1,24 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - run: pip install -r requirements-dev.txt && pip install -e .
+      - run: ruff check .
+      - run: pytest --cov=naturalsql --cov-report=term-missing
+      # The security claims are enforced here: every payload in the corpus must be blocked
+      # and every legitimate benchmark query must pass.
+      - run: python -m naturalsql bench guard --out ci-results
