@@ -18,11 +18,11 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-app = ["streamlit>=1.35", "pandas>=2.1"]
+app = ["streamlit>=1.35", "pandas>=2.1", "plotly>=5.20"]
 api = ["fastapi>=0.110", "uvicorn>=0.29"]
 mysql = ["pymysql>=1.1"]
 postgres = ["psycopg2-binary>=2.9"]
-dev = ["pytest>=8", "pytest-cov>=5", "ruff>=0.4", "streamlit>=1.35", "pandas>=2.1", "fastapi>=0.110", "uvicorn>=0.29"]
+dev = ["pytest>=8", "pytest-cov>=5", "ruff>=0.4", "streamlit>=1.35", "plotly>=5.20", "pandas>=2.1", "fastapi>=0.110", "uvicorn>=0.29"]
 
 [project.scripts]
 naturalsql = "naturalsql.cli:main"
